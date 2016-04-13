@@ -1,3 +1,3 @@
-# Titanic-Competition
+# Kaggle Competitions
 
 Repository of my Kaggle submissions.
