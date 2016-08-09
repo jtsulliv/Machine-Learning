@@ -1,8 +1,15 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Aug 08 13:35:29 2016
+
+@author: JSULLIVAN
+"""
+
 """
 Created on Thu Aug 04 11:20:20 2016
 @author: JSULLIVAN
 """
-
+# JS 8-Aug 2016
 # Pre-processing the data 
 
 import pandas as pd 
@@ -50,14 +57,15 @@ def preproc_act(df):
         
     # Changing categorical variables to integers 
     for col in columns[3:14]:
-        df[col] = df[col].astype('category')
-    cat_columns = df.select_dtypes(['category']).columns
-    df[cat_columns] = df[cat_columns].apply(lambda x: x.cat.codes)
-
+        df[col] = df[col].apply(lambda x: int(x.split(" ")[1]))
+        
+        
     # Renaming the columns to distinguish activity characteristics from people characteristics
     for col in columns[3:14]:
         df = df.rename(columns = {col:'act_'+col})
     return df 
+
+
 
 
 # Function to preprocess the people data    
@@ -77,15 +85,14 @@ def people_preproc(df):
     # Changing categorical variables to integers 
     columns = list(df)
     for col in (columns[1:4] + columns[5:12]):
-        df[col] = df[col].astype('category')
-    cat_columns = df.select_dtypes(['category']).columns
-    df[cat_columns] = df[cat_columns].apply(lambda x: x.cat.codes)
+        df[col] = df[col].apply(lambda x: int(x.split(" ")[1]))
 
     # Changing booleans to integers 
     for col in columns[12:40]:
         df[col] = df[col].astype(int)
 
-    return df     
+    return df 
+
 
 act_train_preproc = preproc_act(df_act_train)
 act_test_preproc = preproc_act(df_act_test)
