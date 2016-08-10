@@ -43,12 +43,15 @@ def preproc_act(df):
      
     #Changing the date object into a date data type and then into number of days from the min date
     df['date']=pd.to_datetime(df['date'])
+    #Placeholder to pull our month and add a new column    
+    
     df['date']=df['date']-baseline_date
     df['date']=df['date'].apply(lambda x: x / np.timedelta64(1,'D'))
     
     #Might want to normalize the date days.     
     df=df.rename(columns = {'date':'act_date'})
-
+    
+    
     
     # Filling in the empty cells with dummy type 'type 0'    
     columns = list(df)    
@@ -65,7 +68,7 @@ def preproc_act(df):
         df = df.rename(columns = {col:'act_'+col})
     return df 
 
-
+    #ANOTHER COMMENT
 
 
 # Function to preprocess the people data    
