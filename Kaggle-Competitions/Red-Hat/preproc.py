@@ -43,12 +43,14 @@ def preproc_act(df):
      
     #Changing the date object into a date data type and then into number of days from the min date
     df['date']=pd.to_datetime(df['date'])
+    #Placeholder to pull our month and add a new column    
+    
     df['date']=df['date']-baseline_date
     df['date']=df['date'].apply(lambda x: x / np.timedelta64(1,'D'))
     
     #Might want to normalize the date days.     
     df=df.rename(columns = {'date':'act_date'})
-
+    
     
     # Filling in the empty cells with dummy type 'type 0'    
     columns = list(df)    
@@ -57,15 +59,17 @@ def preproc_act(df):
         
     # Changing categorical variables to integers 
     for col in columns[3:14]:
-        df[col] = df[col].apply(lambda x: int(x.split(" ")[1]))
+        df[col] = df[col].apply(lambda x: int((x.split(" ")[1])))
         
         
     # Renaming the columns to distinguish activity characteristics from people characteristics
     for col in columns[3:14]:
         df = df.rename(columns = {col:'act_'+col})
+        
+    # Changing people IDs to integers:
+    df['people_id']=df['people_id'].apply(lambda x: int(float(x.split("_")[1])))
+    
     return df 
-
-
 
 
 # Function to preprocess the people data    
@@ -90,6 +94,12 @@ def people_preproc(df):
     # Changing booleans to integers 
     for col in columns[12:40]:
         df[col] = df[col].astype(int)
+    
+    # Change char_30 to float
+    df['char_38']=df['char_38'].astype(float)
+    
+    # Changing people IDs to integers:
+    df['people_id']=df['people_id'].apply(lambda x:int(float(x.split("_")[1])))
 
     return df 
 
