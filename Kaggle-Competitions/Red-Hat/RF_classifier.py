@@ -6,14 +6,13 @@ Created on Sat Aug 13 12:15:00 2016
 """
 
 import pandas as pd
-import random 
 from sklearn.cross_validation import StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix, roc_curve, auc
 import matplotlib.pyplot as plt
 
 #Set seed so that can repeat experiments
-random.seed(1)
+np.random.seed(1)
 
 #Load preprocessed Training Data
 train_df=pd.read_csv('train_preproc.csv', index_col=0)
