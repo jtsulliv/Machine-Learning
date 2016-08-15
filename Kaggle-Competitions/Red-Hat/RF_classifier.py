@@ -6,6 +6,7 @@ Created on Sat Aug 13 12:15:00 2016
 """
 
 import pandas as pd
+import numpy as np
 from sklearn.cross_validation import StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix, roc_curve, auc

@@ -38,13 +38,13 @@ baseline_date=df_p['date'].min()
 # Function to preprocess the activity files
 def preproc_act(df):
     
-    # Dropping the date column and activity_id
-    #df = df.drop(['date', 'activity_id'], axis = 1)   # axis=1 b/c this applies to a colummn label;  axis=0 applies to row
-     
-    #Changing the date object into a date data type and then into number of days from the min date
+    #Changing the date object into a date data type 
     df['date']=pd.to_datetime(df['date'])
-    #Placeholder to pull our month and add a new column    
     
+    #Adding feature for month of activity
+    df['act_month']=df['date'].apply(lambda x:x.month)    
+    
+    #Changing date feature into a number of days from some baseline
     df['date']=df['date']-baseline_date
     df['date']=df['date'].apply(lambda x: x / np.timedelta64(1,'D'))
     
@@ -75,11 +75,9 @@ def preproc_act(df):
 # Function to preprocess the people data    
 def people_preproc(df):
         
-    # Dropping the date column
-    #df = df.drop('date', axis = 1)   # axis=1 b/c this applies to a colummn label;  axis=0 applies to row
-      
-    #Changing the date object into a date data type and then into number of days from the min date
-    #df['date']=pd.to_datetime(df['date'])
+    #Adding feature for month of person
+    df['people_month']=df['date'].apply(lambda x:x.month)
+    #Change date into a number of days
     df['date']=df['date']-baseline_date
     df['date']=df['date'].apply(lambda x: x / np.timedelta64(1,'D'))
 
@@ -122,3 +120,4 @@ test_merged = join_data(act_test_preproc, people_preproc)
 # Writing the preprocessed data to csv files
 train_merged.to_csv('train_preproc.csv')
 test_merged.to_csv('test_preproc.csv')
+
