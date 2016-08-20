@@ -42,7 +42,7 @@ def preproc_act(df):
     grouped['people_id']=grouped.index
     df=df.merge(grouped, on='people_id')
     
-    df['total_acts']=df_act_train.groupby(['people_id'])['activity_category'].transform('count')
+    df['total_acts']=df.groupby(['people_id'])['activity_category'].transform('count')
     
     #Adding feature for month of activity
     df['act_month']=df['date'].apply(lambda x:x.month)   
