@@ -56,8 +56,8 @@ def preproc_act(df):
     
     
     for col in columns[5:12]:
-        #df[col]=df[col]/df['total_acts'] #If want totals not fractions of each type then comment this out
-        df=df.rename(columns={col:'total'+col})   
+        df[col]=df[col]/df['total_acts'] #If want totals not fractions of each type then comment this out
+        df=df.rename(columns={col:'total_type_'+col.split(" ")[1]})   
         
     #Changing date feature into a number of days from some baseline
     df['date']=df['date']-baseline
