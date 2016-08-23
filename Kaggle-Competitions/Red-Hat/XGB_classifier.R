@@ -29,6 +29,28 @@ act_train <- fread("act_train.csv")
 # Merging the people and activity data 
 X_train <- merge(act_train, people, by = "people_id", all.x = T)
 
+# Changing the date strings to dates 
+X_train$date.x = as.Date(X_train$date.x)
+X_train$date.y = as.Date(X_train$date.y)
+
+# Putting in new features for the dates as difference in days between the current date and the baseline date
+min_date = min(X_train$date.x, X_train$date.y)
+X_train$date.x.num = as.numeric(X_train$date.x - min_date)
+X_train$date.y.num = as.numeric(X_train$date.y - min_date)
+
+# Putting in new feature for month
+X_train$date.x.month = format(X_train$date.x, "%m")
+X_train$date.y.month = format(X_train$date.y, "%m")
+
+# Putting in new feature for year
+X_train$date.x.year = format(X_train$date.x, "%y")
+X_train$date.y.year = format(X_train$date.y, "%y")
+
+# Putting in new feature for group_1 + month + year
+X_train$group_x.month = paste(X_train$group_1, X_train$date.x.month, X_train$date.x.year, sep = "_")
+X_train$group_y.month = paste(X_train$group_1, X_train$date.y.month, X_train$date.y.year, sep = "_")
+
+
 # Creating the outcome vector
 Y_train <- X_train$outcome
 
@@ -102,6 +124,27 @@ m2 <- xgb.train(data = dtrain, param, nrounds = 100,
 
 test <- fread("act_test.csv", showProgress = F)
 d2   <- merge(test, people, by = "people_id", all.x = T)
+
+# Changing the date strings to dates 
+d2$date.x = as.Date(d2$date.x)
+d2$date.y = as.Date(d2$date.y)
+
+# Putting in new features for the dates as difference in days between the current date and the baseline date
+
+d2$date.x.num = as.numeric(d2$date.x - min_date)
+d2$date.y.num = as.numeric(d2$date.y - min_date)
+
+# Putting in new feature for month
+d2$date.x.month = format(d2$date.x, "%m")
+d2$date.y.month = format(d2$date.y, "%m")
+
+# Putting in new feature for year
+d2$date.x.year = format(d2$date.x, "%y")
+d2$date.y.year = format(d2$date.y, "%y")
+
+# Putting in new feature for group_1 + month
+d2$group_x.month = paste(d2$group_1, d2$date.x.month, d2$date.x.year, sep = "_")
+d2$group_y.month = paste(d2$group_1, d2$date.y.month, d2$date.x.year, sep = "_")
 
 X_test <- hashed.model.matrix(f, d2, hash.size = b)
 dtest  <- xgb.DMatrix(X_test)
