@@ -90,13 +90,31 @@ D$people_date.year = format(D$people_date, "%y")
 
 # Putting in new feature for group_1 + month + year
 D$date.1 = paste(D$people_group_1, D$date.month, D$date.year, sep = "_")
-D$date.2 = paste(D$people_group_1, D$people_date.month, D$people_date.year, sep = "_")
+#D$date.2 = paste(D$people_group_1, D$people_date.month, D$people_date.year, sep = "_")
+
+#replacing all group_date features with a unique group
+D[grep('unique', D$date.1),]$date.1<-"unique_date_group"
+#[grep('unique', D$date.2),]$date.2<-"unique_date_group"
+
+
+# adding a feature called "act_count.Freq" that shows the frequency of the activities 
+#D<-transform(D, act_count=table(people_id)[people_id])
+#D$act_count.people_id<-NULL
+#D$act_count.Freq<-log(D$act_count.Freq)
+
+#adding features for total number of each type of activity:
+#activity_counts=as.data.frame.matrix(table(D$people_id, D$activity_category))
+#names(activity_counts)=c("total_type1", "total_type2", "total_type3", "total_type4", "total_type5", "total_type6", "total_type7")
+#activity_counts$people_id=row.names(activity_counts)
+#D<-merge(D, activity_counts, by="people_id")
+
+
 
 # Changing categorical features to integers 
 char.cols=c('activity_category','people_group_1',
             'char_1','char_2','char_3','char_4','char_5','char_6','char_7','char_8','char_9','char_10',
             'people_char_2','people_char_3','people_char_4','people_char_5','people_char_6','people_char_7','people_char_8','people_char_9','date.month','people_date.month',
-            'date.year','people_date.year','date.1','date.2')
+            'date.year','people_date.year','date.1')
 for (f in char.cols) {
   if (class(D[[f]])=="character") {
     levels <- unique(c(D[[f]]))
@@ -130,8 +148,7 @@ D.sparse=
         sparseMatrix(D$i,D$people_date.month),
         sparseMatrix(D$i,D$date.year),
         sparseMatrix(D$i,D$people_date.year),
-        sparseMatrix(D$i,D$date.1),
-        sparseMatrix(D$i,D$date.2)
+        sparseMatrix(D$i,D$date.1)
         
   )
 
