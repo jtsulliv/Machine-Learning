@@ -97,6 +97,22 @@ D[grep('unique', D$date.1),]$date.1<-"unique_date_group"
 #[grep('unique', D$date.2),]$date.2<-"unique_date_group"
 
 
+
+# Adding supervised ratio for date.1 feature
+Dtrain<-cbind(D[1:row.train,],Y)
+sumoutcomes<-aggregate(Y~date.1, data=Dtrain, sum)
+countoutcomes<-aggregate(Y~date.1, data=Dtrain, length)
+supervisedratio<-cbind(data.frame(date.1=sumoutcomes$date.1), data.frame(SVratio1=sumoutcomes$Y/countoutcomes$Y))
+rm(sumoutcomes, countoutcomes)
+
+D<-merge(D, supervisedratio, by='date.1', all.x=TRUE) 
+D<-D[order(D$i),]
+rm(supervisedratio)
+averatio<-sum(Y)/length(Y)
+D[is.na(D$SVratio1),]$SVratio1<-averatio
+
+
+
 # adding a feature called "act_count.Freq" that shows the frequency of the activities 
 #D<-transform(D, act_count=table(people_id)[people_id])
 #D$act_count.people_id<-NULL
@@ -186,7 +202,9 @@ D.sparse=
         D$people_char_37,
         D$people_char_38,
         D$date.days,
-        D$people_date.days)
+        D$people_date.days,
+        D$SVratio1
+        )
       
 # Creating train/test sets 
 train.sparse=D.sparse[1:row.train,]
@@ -265,8 +283,6 @@ sub <- data.frame(activity_id = test_activity_id, outcome = out)
 write.csv(sub, file = "model_sub.csv", row.names = F)
 
 #0.98035
-
-
 
 
 
@@ -423,6 +439,7 @@ cat("There are now in total ", sum(is.na(testsetdt$filled)), " unknown observati
 write.csv(testsetdt,"Submission.csv", row.names = FALSE)
 
 cat("Cleaning up...\n")
+
 remove(list = ls())
 gc(verbose=FALSE)
 
@@ -442,4 +459,8 @@ submit3 <- merge(submit1[is.na(submit1$filled), ], submit2, by = "activity_id", 
 submit4 <- merge(submit1, submit3, by = "activity_id", all.x = T)
 submit4$filled.x[is.na(submit4$filled.x)] <- submit4$outcome[is.na(submit4$filled.x)]
 submit5 <- data.frame(activity_id = submit4$activity_id, outcome = submit4$filled.x, stringsAsFactors = FALSE)
-write.csv(submit5, file="sub_22.csv", row.names=FALSE)
+write.csv(submit5, file="erica_831_2.csv", row.names=FALSE)
+
+
+
+
