@@ -57,6 +57,35 @@ D=rbind(d1,d2)
 D$i=1:dim(D)[1]
 
 
+
+d3<-d1
+d3$outcome<- Y
+d3<-d3[d3$people_char_2!='type 2',]
+
+d3$char_10[d3$char_10 %in% names(which(table(d3$char_10)<=40))]=""
+sumoutcomes<-aggregate(outcome~char_10, data=d3, sum)
+countoutcomes<-aggregate(outcome~char_10, data=d3, length)
+supervisedratio<-cbind(data.frame(char_10=sumoutcomes$char_10), data.frame(SVratio1=sumoutcomes$outcome/countoutcomes$outcome))
+rm(d3)
+supervisedratio$cat<-3
+supervisedratio$cat[supervisedratio$SVratio1<=0.85]<-2
+supervisedratio$cat[supervisedratio$SVratio1<=0.5]<-1
+
+supervisedratio$cat<-as.numeric(supervisedratio$cat)
+supervisedratio<-supervisedratio[supervisedratio$char_10!="",]
+supervisedratio<-supervisedratio[-2]
+names(supervisedratio)<-c("char_10", "SVratio1")
+
+D<-merge(D, supervisedratio, by='char_10', all.x=TRUE) 
+D<-D[order(D$i),]
+D[is.na(D$SVratio1),]$SVratio1<-2
+
+# JUST THESE THREE LINES AND NOT THE SVRATIO IS HOW WE GOT THE CURRENT BEST SCORE
+D$char_10[D$char_10!='type 23']<-0
+D$char_10[D$char_10=='type 23']<-1
+D$char_10<-as.numeric(D$char_10)
+
+
 ###uncomment this for CV run
 #set.seed(120)
 #unique_p <- unique(d1$people_id)
@@ -97,6 +126,22 @@ D[grep('unique', D$date.1),]$date.1<-"unique_date_group"
 #[grep('unique', D$date.2),]$date.2<-"unique_date_group"
 
 
+
+# Adding supervised ratio for date.1 feature
+#Dtrain<-cbind(D[1:row.train,],Y)
+#sumoutcomes<-aggregate(Y~date.1, data=Dtrain, sum)
+#countoutcomes<-aggregate(Y~date.1, data=Dtrain, length)
+#supervisedratio<-cbind(data.frame(date.1=sumoutcomes$date.1), data.frame(SVratio1=sumoutcomes$Y/countoutcomes$Y))
+#rm(sumoutcomes, countoutcomes)
+
+#D<-merge(D, supervisedratio, by='date.1', all.x=TRUE) 
+#D<-D[order(D$i),]
+#rm(supervisedratio)
+#averatio<-sum(Y)/length(Y)
+#D[is.na(D$SVratio1),]$SVratio1<-averatio
+
+
+
 # adding a feature called "act_count.Freq" that shows the frequency of the activities 
 #D<-transform(D, act_count=table(people_id)[people_id])
 #D$act_count.people_id<-NULL
@@ -112,7 +157,7 @@ D[grep('unique', D$date.1),]$date.1<-"unique_date_group"
 
 # Changing categorical features to integers 
 char.cols=c('activity_category','people_group_1',
-            'char_1','char_2','char_3','char_4','char_5','char_6','char_7','char_8','char_9','char_10',
+            'char_1','char_2','char_3','char_4','char_5','char_6','char_7','char_8','char_9', 'SVratio1',
             'people_char_2','people_char_3','people_char_4','people_char_5','people_char_6','people_char_7','people_char_8','people_char_9','date.month','people_date.month',
             'date.year','people_date.year','date.1')
 for (f in char.cols) {
@@ -148,7 +193,8 @@ D.sparse=
         sparseMatrix(D$i,D$people_date.month),
         sparseMatrix(D$i,D$date.year),
         sparseMatrix(D$i,D$people_date.year),
-        sparseMatrix(D$i,D$date.1)
+        sparseMatrix(D$i,D$date.1),
+        sparseMatrix(D$i, D$SVratio1)
         
   )
 
@@ -186,8 +232,10 @@ D.sparse=
         D$people_char_37,
         D$people_char_38,
         D$date.days,
-        D$people_date.days)
-      
+        D$people_date.days,
+        D$char_10
+  )
+
 # Creating train/test sets 
 train.sparse=D.sparse[1:row.train,]
 test.sparse=D.sparse[(row.train+1):nrow(D.sparse),]
@@ -265,8 +313,6 @@ sub <- data.frame(activity_id = test_activity_id, outcome = out)
 write.csv(sub, file = "model_sub.csv", row.names = F)
 
 #0.98035
-
-
 
 
 
@@ -423,6 +469,7 @@ cat("There are now in total ", sum(is.na(testsetdt$filled)), " unknown observati
 write.csv(testsetdt,"Submission.csv", row.names = FALSE)
 
 cat("Cleaning up...\n")
+
 remove(list = ls())
 gc(verbose=FALSE)
 
@@ -442,4 +489,6 @@ submit3 <- merge(submit1[is.na(submit1$filled), ], submit2, by = "activity_id", 
 submit4 <- merge(submit1, submit3, by = "activity_id", all.x = T)
 submit4$filled.x[is.na(submit4$filled.x)] <- submit4$outcome[is.na(submit4$filled.x)]
 submit5 <- data.frame(activity_id = submit4$activity_id, outcome = submit4$filled.x, stringsAsFactors = FALSE)
-write.csv(submit5, file="sub_22.csv", row.names=FALSE)
+write.csv(submit5, file="erica_91_5.csv", row.names=FALSE)
+
+
